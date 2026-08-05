@@ -37,6 +37,10 @@ RUN curl -fsSL "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/${HA
     curl -fsSL "https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/${AWS_SDK_VERSION}/aws-java-sdk-bundle-${AWS_SDK_VERSION}.jar" \
     -o /opt/spark/jars/aws-java-sdk-bundle-${AWS_SDK_VERSION}.jar
 
+# --- PostgreSQL JDBC driver (lets Spark write to PostgreSQL DWH) ---
+RUN curl -fsSL "https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.3/postgresql-42.7.3.jar" \
+    -o /opt/spark/jars/postgresql-42.7.3.jar
+
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install --no-cache-dir -r /tmp/requirements.txt
 
