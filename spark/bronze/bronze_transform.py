@@ -1,6 +1,6 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import current_timestamp, lit
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType, ArrayType  
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType, ArrayType, FloatType  
 spark = SparkSession.builder.appName("Bronze Transformation").getOrCreate()
 
 RAW_BASE    = "s3a://raw/instacart"
@@ -29,7 +29,7 @@ TABLES = {
             StructField("order_number", IntegerType(), False),
             StructField("order_dow", IntegerType(), False),
             StructField("order_hour_of_day", IntegerType(), False),
-            StructField("days_since_prior_order", IntegerType(), True)
+            StructField("days_since_prior_order", FloatType(), True)
         ])
     },
     "departments": {
@@ -54,7 +54,7 @@ def read_raw(read_path, table_name):
 def write_bronze(df, write_path):
     df = df.withColumn("_ingested_at", current_timestamp()) \
            .withColumn("_source", lit("bronze"))
-    df.write.format("delta").mode("overwrite").save(write_path)
+    df.write.format("delta").mode("overwrite").option("overwriteSchema", "true").save(write_path)
 
 
 if __name__ == "__main__":
