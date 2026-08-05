@@ -15,7 +15,7 @@ ENV SPARK_HOME=/opt/spark \
     PYSPARK_PYTHON=python3
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl python3 python3-pip procps && \
+    apt-get install -y --no-install-recommends curl python3 python3-pip procps dos2unix && \
     rm -rf /var/lib/apt/lists/*
 
 # --- Spark ---
@@ -44,7 +44,8 @@ RUN pip3 install --no-cache-dir -r /tmp/requirements.txt
 # from environment variables at container start via spark-defaults.conf.template
 COPY spark-defaults.conf.template /opt/spark/conf/spark-defaults.conf.template
 COPY entrypoint.sh /opt/entrypoint.sh
-RUN chmod +x /opt/entrypoint.sh
+# Strip Windows CRLF line endings in case the file was checked out on Windows
+RUN dos2unix /opt/entrypoint.sh && chmod +x /opt/entrypoint.sh
 
 WORKDIR /opt/spark-apps
 

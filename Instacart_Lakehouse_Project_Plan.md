@@ -148,7 +148,7 @@ Goal: Architecture, setup, design decisions, troubleshooting.
 # Repository Structure
 
 ``` text
-instacart-lakehouse-platform/
+instacart-lakehouse-pipeline/
 │
 ├── airflow/
 │   ├── dags/

@@ -1,0 +1,21 @@
+# Enforce LF line endings for files that run inside Linux containers.
+# Without this, git on Windows will check out shell scripts with CRLF,
+# which breaks the #!/usr/bin/env bash shebang inside Docker.
+
+*.sh        text eol=lf
+*.bash      text eol=lf
+Dockerfile* text eol=lf
+*.conf      text eol=lf
+*.toml      text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.py        text eol=lf
+*.sql       text eol=lf
+*.md        text eol=lf
+
+# Binary files — no line-ending conversion
+*.parquet   binary
+*.zip       binary
+*.gz        binary
+*.png       binary
+*.jpg       binary
