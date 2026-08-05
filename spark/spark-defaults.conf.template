@@ -1,0 +1,16 @@
+# Rendered into /opt/spark/conf/spark-defaults.conf at container start.
+# Placeholders (__VAR__) are substituted by entrypoint.sh from env vars.
+
+spark.sql.extensions                          io.delta.sql.DeltaSparkSessionExtension
+spark.sql.catalog.spark_catalog                org.apache.spark.sql.delta.catalog.DeltaCatalog
+
+spark.hadoop.fs.s3a.endpoint                   __MINIO_ENDPOINT__
+spark.hadoop.fs.s3a.access.key                 __MINIO_ROOT_USER__
+spark.hadoop.fs.s3a.secret.key                 __MINIO_ROOT_PASSWORD__
+spark.hadoop.fs.s3a.path.style.access          true
+spark.hadoop.fs.s3a.impl                       org.apache.hadoop.fs.s3a.S3AFileSystem
+spark.hadoop.fs.s3a.connection.ssl.enabled     false
+spark.hadoop.fs.s3a.aws.credentials.provider   org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider
+
+spark.eventLog.enabled                         false
+spark.sql.shuffle.partitions                   8
