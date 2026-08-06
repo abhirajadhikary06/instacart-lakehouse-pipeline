@@ -1,54 +1,55 @@
 name: instacart-lakehouse
 
-# # ---------------------------------------------------------------------------
-# # PHASE 2 — Airflow shared config (uncomment when adding Airflow)
-# # ---------------------------------------------------------------------------
-# x-airflow-common: &airflow-common
-#   build:
-#     context: ./airflow
-#     dockerfile: Dockerfile
-#   image: instacart-lakehouse-pipeline/airflow:latest
-#   pull_policy: never
-#   environment: &airflow-common-env
-#     AIRFLOW__CORE__EXECUTOR: LocalExecutor
-#     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_DB_USER:-airflow}:${AIRFLOW_DB_PASSWORD:-airflow}@postgres-airflow:5432/${AIRFLOW_DB_NAME:-airflow}
-#     AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:-}
-#     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-#     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
-#     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
-#     AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_WEBSERVER_SECRET_KEY:-please-change-me}
-#     AIRFLOW__METRICS__STATSD_ON: "false"
-#     AIRFLOW_CONN_MINIO_S3: "aws://${MINIO_ROOT_USER:-minioadmin}:${MINIO_ROOT_PASSWORD:-minioadmin123}@?host=http://minio:9000"
-#     KAGGLE_USERNAME: ${KAGGLE_USERNAME:-}
-#     KAGGLE_KEY: ${KAGGLE_KEY:-}
-#     DESTINATION__FILESYSTEM__BUCKET_URL: s3://raw
-#     DESTINATION__FILESYSTEM__CREDENTIALS__AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-minioadmin}
-#     DESTINATION__FILESYSTEM__CREDENTIALS__AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin123}
-#     DESTINATION__FILESYSTEM__CREDENTIALS__ENDPOINT_URL: http://minio:9000
-#     RUNTIME__DLTHUB_TELEMETRY: "false"
-#     SPARK_MASTER_URL: spark://spark-master:7077
-#     DBT_PROJECT_DIR: /opt/airflow/dbt
-#     DBT_PROFILES_DIR: /opt/airflow/dbt
-#     POSTGRES_DWH_HOST: postgres-dwh
-#     POSTGRES_DWH_PORT: 5432
-#     POSTGRES_DWH_DB: ${POSTGRES_DWH_DB:-instacart_dwh}
-#     POSTGRES_DWH_USER: ${POSTGRES_DWH_USER:-dwh_user}
-#     POSTGRES_DWH_PASSWORD: ${POSTGRES_DWH_PASSWORD:-dwh_password}
-#   volumes:
-#     - ./airflow/dags:/opt/airflow/dags
-#     - ./airflow/plugins:/opt/airflow/plugins
-#     - ./airflow/logs:/opt/airflow/logs
-#     - ./airflow/include:/opt/airflow/include
-#     - ./spark:/opt/airflow/spark
-#     - ./dbt:/opt/airflow/dbt
-#     - ./ingestion:/opt/airflow/ingestion
-#     - ./data:/opt/airflow/data
-#     - ./configs:/opt/airflow/configs
-#   networks:
-#     - lakehouse
-#   depends_on:
-#     postgres-airflow:
-#       condition: service_healthy
+# ---------------------------------------------------------------------------
+# PHASE 2 — Airflow shared config
+# ---------------------------------------------------------------------------
+x-airflow-common: &airflow-common
+  build:
+    context: ./airflow
+    dockerfile: Dockerfile
+  image: instacart-lakehouse-pipeline/airflow:latest
+  pull_policy: never
+  environment: &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_DB_USER:-airflow}:${AIRFLOW_DB_PASSWORD:-airflow}@postgres-airflow:5432/${AIRFLOW_DB_NAME:-airflow}
+    AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
+    AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_WEBSERVER_SECRET_KEY}
+    AIRFLOW__METRICS__STATSD_ON: "false"
+    AIRFLOW_CONN_MINIO_S3: "aws://${MINIO_ROOT_USER:-minioadmin}:${MINIO_ROOT_PASSWORD:-minioadmin123}@?host=http://minio:9000"
+    KAGGLE_USERNAME: ${KAGGLE_USERNAME:-}
+    KAGGLE_KEY: ${KAGGLE_KEY:-}
+    DESTINATION__FILESYSTEM__BUCKET_URL: s3://raw
+    DESTINATION__FILESYSTEM__CREDENTIALS__AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-minioadmin}
+    DESTINATION__FILESYSTEM__CREDENTIALS__AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin123}
+    DESTINATION__FILESYSTEM__CREDENTIALS__ENDPOINT_URL: http://minio:9000
+    RUNTIME__DLTHUB_TELEMETRY: "false"
+    SPARK_MASTER_URL: spark://spark-master:7077
+    DBT_PROJECT_DIR: /opt/airflow/dbt
+    DBT_PROFILES_DIR: /opt/airflow/dbt
+    POSTGRES_DWH_HOST: postgres-dwh
+    POSTGRES_DWH_PORT: 5432
+    POSTGRES_DWH_DB: ${POSTGRES_DWH_DB:-instacart_dwh}
+    POSTGRES_DWH_USER: ${POSTGRES_DWH_USER:-dwh_user}
+    POSTGRES_DWH_PASSWORD: ${POSTGRES_DWH_PASSWORD:-dwh_password}
+  user: "${AIRFLOW_UID:-50000}:0"
+  volumes:
+    - ./airflow/dags:/opt/airflow/dags
+    - ./airflow/plugins:/opt/airflow/plugins
+    - ./airflow/logs:/opt/airflow/logs
+    - ./airflow/include:/opt/airflow/include
+    - ./spark:/opt/airflow/spark
+    - ./dbt:/opt/airflow/dbt
+    - ./ingestion:/opt/airflow/ingestion
+    - ./data:/opt/airflow/data
+    - ./configs:/opt/airflow/configs
+  networks:
+    - lakehouse
+  depends_on:
+    postgres-airflow:
+      condition: service_healthy
 
 services:
 
@@ -185,81 +186,81 @@ services:
       - lakehouse
     restart: unless-stopped
 
-  # # ---------------------------------------------------------------------------
-  # # PHASE 2 — Airflow (uncomment when ready)
-  # # ---------------------------------------------------------------------------
-  # postgres-airflow:
-  #   image: postgres:16-alpine
-  #   container_name: lakehouse-postgres-airflow
-  #   environment:
-  #     POSTGRES_USER: ${AIRFLOW_DB_USER:-airflow}
-  #     POSTGRES_PASSWORD: ${AIRFLOW_DB_PASSWORD:-airflow}
-  #     POSTGRES_DB: ${AIRFLOW_DB_NAME:-airflow}
-  #   volumes:
-  #     - postgres-airflow-data:/var/lib/postgresql/data
-  #   ports:
-  #     - "${AIRFLOW_DB_PORT:-5433}:5432"
-  #   networks:
-  #     - lakehouse
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U ${AIRFLOW_DB_USER:-airflow} -d ${AIRFLOW_DB_NAME:-airflow}"]
-  #     interval: 5s
-  #     timeout: 5s
-  #     retries: 10
-  #   restart: unless-stopped
-  #
-  # airflow-init:
-  #   <<: *airflow-common
-  #   container_name: lakehouse-airflow-init
-  #   entrypoint: /bin/bash
-  #   command:
-  #     - -c
-  #     - |
-  #       airflow db migrate
-  #       airflow users create \
-  #         --username "${AIRFLOW_ADMIN_USER:-admin}" \
-  #         --password "${AIRFLOW_ADMIN_PASSWORD:-admin}" \
-  #         --firstname Admin \
-  #         --lastname User \
-  #         --role Admin \
-  #         --email admin@example.com || true
-  #   restart: "no"
-  #
-  # airflow-webserver:
-  #   <<: *airflow-common
-  #   container_name: lakehouse-airflow-webserver
-  #   command: webserver
-  #   ports:
-  #     - "${AIRFLOW_WEBSERVER_PORT:-8080}:8080"
-  #   depends_on:
-  #     postgres-airflow:
-  #       condition: service_healthy
-  #     airflow-init:
-  #       condition: service_completed_successfully
-  #   healthcheck:
-  #     test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
-  #     interval: 15s
-  #     timeout: 10s
-  #     retries: 5
-  #     start_period: 30s
-  #   restart: unless-stopped
-  #
-  # airflow-scheduler:
-  #   <<: *airflow-common
-  #   container_name: lakehouse-airflow-scheduler
-  #   command: scheduler
-  #   depends_on:
-  #     postgres-airflow:
-  #       condition: service_healthy
-  #     airflow-init:
-  #       condition: service_completed_successfully
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "airflow jobs check --job-type SchedulerJob --hostname \"$${HOSTNAME}\""]
-  #     interval: 15s
-  #     timeout: 10s
-  #     retries: 5
-  #     start_period: 30s
-  #   restart: unless-stopped
+  # ---------------------------------------------------------------------------
+  # PHASE 2 — Airflow
+  # ---------------------------------------------------------------------------
+  postgres-airflow:
+    image: postgres:16-alpine
+    container_name: lakehouse-postgres-airflow
+    environment:
+      POSTGRES_USER: ${AIRFLOW_DB_USER:-airflow}
+      POSTGRES_PASSWORD: ${AIRFLOW_DB_PASSWORD:-airflow}
+      POSTGRES_DB: ${AIRFLOW_DB_NAME:-airflow}
+    volumes:
+      - postgres-airflow-data:/var/lib/postgresql/data
+    ports:
+      - "${AIRFLOW_DB_PORT:-5433}:5432"
+    networks:
+      - lakehouse
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${AIRFLOW_DB_USER:-airflow} -d ${AIRFLOW_DB_NAME:-airflow}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  airflow-init:
+    <<: *airflow-common
+    container_name: lakehouse-airflow-init
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        airflow db migrate
+        airflow users create \
+          --username "${AIRFLOW_ADMIN_USER:-admin}" \
+          --password "${AIRFLOW_ADMIN_PASSWORD:-admin}" \
+          --firstname Admin \
+          --lastname User \
+          --role Admin \
+          --email admin@example.com || true
+    restart: "no"
+
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: lakehouse-airflow-webserver
+    command: webserver
+    ports:
+      - "${AIRFLOW_WEBSERVER_PORT:-8080}:8080"
+    depends_on:
+      postgres-airflow:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: lakehouse-airflow-scheduler
+    command: scheduler
+    depends_on:
+      postgres-airflow:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "airflow jobs check --job-type SchedulerJob --hostname \"$${HOSTNAME}\""]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
 
   # ---------------------------------------------------------------------------
   # PHASE 3 — PostgreSQL DWH + Streamlit (BI layer)
@@ -365,7 +366,8 @@ networks:
 
 volumes:
   minio-data:
-  # postgres-airflow-data:   # Phase 2
+  # postgres-airflow-data:   # Phase 2 — uncomment when Airflow is enabled
+  postgres-airflow-data:
   postgres-dwh-data:
   prometheus-data:
   grafana-data:
