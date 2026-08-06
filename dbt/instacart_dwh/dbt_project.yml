@@ -1,0 +1,30 @@
+
+name: 'instacart_dwh'
+version: '1.0.0'
+config-version: 2
+
+profile: 'instacart_dwh'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:       
+  - "target"
+  - "dbt_packages"
+
+models:
+  instacart_dwh:
+    staging:
+      +schema: stg
+      +tags: ['stg']
+      +materialized: table
+
+    marts:
+      +schema: marts
+      +tags: ['marts']
+      +materialized: view
+

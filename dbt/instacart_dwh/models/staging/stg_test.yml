@@ -1,0 +1,52 @@
+models:
+  - name: stg_aisle_reorder_analysis
+    columns: 
+      - name: aisle_id
+        tests: 
+          - not_null
+          - unique
+      - name: aisle 
+        tests:
+          - not_null
+  
+  - name: stg_department_summary
+    columns: 
+      - name: department_id
+        tests: 
+          - not_null
+          - unique
+      - name: department 
+        tests:
+          - not_null
+
+  - name: stg_order_time_analysis
+    columns: 
+      - name: order_hour_of_day
+        tests:
+          - not_null
+      - name: order_dow
+        tests: 
+          - not_null
+
+  - name: stg_product_popularity
+    columns: 
+      - name: product_id
+        tests:
+          - not_null
+          - unique
+      - name: product_name
+        tests: 
+          - not_null
+
+  - name: stg_user_order_behaviour
+    columns: 
+      - name: user_id
+        tests:
+          - not_null
+          - unique
+      - name: max_days_since_prior_order
+        tests: 
+          - not_null
+      - name: avg_days_between_orders
+        tests:
+          - not_null

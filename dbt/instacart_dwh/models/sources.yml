@@ -1,0 +1,9 @@
+sources:
+  - name: gold
+    schema: public
+    tables:
+      - name: gold_product_popularity
+      - name: gold_department_summary
+      - name: gold_order_time_analysis
+      - name: gold_user_order_behaviour
+      - name: gold_aisle_reorder_analysis

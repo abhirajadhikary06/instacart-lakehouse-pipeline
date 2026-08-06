@@ -1,0 +1,1 @@
+select * from {{ source('gold','gold_user_order_behaviour') }}

@@ -1,0 +1,1 @@
+select * from {{ source('gold','gold_product_popularity') }}
