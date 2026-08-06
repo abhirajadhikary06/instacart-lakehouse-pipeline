@@ -32,10 +32,10 @@ INSERT INTO gold_department_summary VALUES
     (1,  'snacks',        55000, 0.65);
 
 CREATE TABLE IF NOT EXISTS gold_order_time_analysis (
-    order_dow        INT,
+    order_dow         INT,
     order_hour_of_day INT,
-    total_orders     BIGINT,
-    avg_basket_size  FLOAT
+    total_orders      BIGINT,
+    avg_basket_size   FLOAT
 );
 
 INSERT INTO gold_order_time_analysis VALUES
@@ -53,25 +53,25 @@ CREATE TABLE IF NOT EXISTS gold_aisle_reorder_analysis (
 );
 
 INSERT INTO gold_aisle_reorder_analysis VALUES
-    (24, 'fresh fruits',       80000, 0.85),
-    (83, 'milk',               70000, 0.80),
-    (123,'fresh vegetables',   75000, 0.82),
-    (31, 'refrigerated',       40000, 0.68);
+    (24,  'fresh fruits',     80000, 0.85),
+    (83,  'milk',             70000, 0.80),
+    (123, 'fresh vegetables', 75000, 0.82),
+    (31,  'refrigerated',     40000, 0.68);
 
 CREATE TABLE IF NOT EXISTS gold_user_order_behaviour (
-    user_id                   INT,
-    total_orders              INT,
-    total_products_ordered    INT,
-    avg_add_to_cart_position  FLOAT,
+    user_id                    INT,
+    total_orders               INT,
+    total_products_ordered     INT,
+    avg_add_to_cart_position   FLOAT,
     max_days_since_prior_order FLOAT,
-    unique_products_count     INT,
-    avg_basket_size           FLOAT,
-    avg_days_between_orders   FLOAT
+    unique_products_count      INT,
+    avg_basket_size            FLOAT,
+    avg_days_between_orders    FLOAT
 );
 
 INSERT INTO gold_user_order_behaviour VALUES
-    (1,  12, 150, 5.2, 30.0, 80,  12.5, 8.3),
-    (2,   3,  20, 3.1, 14.0, 18,   6.7, 10.0),
-    (3,   7,  80, 7.8, 21.0, 55,  11.4, 7.5),
-    (4,   1,   8, 2.5,  null, 8,   8.0, null),
-    (5,  20, 300, 9.0, 10.0, 200, 15.0, 6.0);
+    (1,  12, 150, 5.2, 30.0,  80, 12.5,  8.3),
+    (2,   3,  20, 3.1, 14.0,  18,  6.7, 10.0),
+    (3,   7,  80, 7.8, 21.0,  55, 11.4,  7.5),
+    (4,   1,   8, 2.5,  null,  8,  8.0,  null),
+    (5,  20, 300, 9.0, 10.0, 200, 15.0,  6.0);
