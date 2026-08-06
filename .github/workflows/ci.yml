@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+
+  # Job 1: Lint Python code
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install linting tools
+        run: pip install ruff black
+
+      - name: Run ruff
+        run: ruff check ingestion/ spark/ dashboard/
+
+      - name: Check black formatting
+        run: black --check ingestion/ spark/ dashboard/
+
+  # Job 2: dbt compile + test (runs against a temporary PostgreSQL service)
+  dbt-test:
+    name: dbt build & test
+    runs-on: ubuntu-latest
+    needs: lint
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: dwh_user
+          POSTGRES_PASSWORD: dwh_password
+          POSTGRES_DB: instacart_dwh
+        options: >-
+          --health-cmd "pg_isready -U dwh_user -d instacart_dwh"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5434:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dbt
+        run: pip install dbt-postgres==1.8.2
+
+      - name: Write dbt profiles.yml for CI
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml << 'EOF'
+          instacart_dwh:
+            target: ci
+            outputs:
+              ci:
+                type: postgres
+                host: localhost
+                port: 5434
+                user: dwh_user
+                password: dwh_password
+                dbname: instacart_dwh
+                schema: ci_marts
+                threads: 2
+          EOF
+
+      - name: Seed Gold tables for CI (minimal fixture data)
+        run: |
+          psql postgresql://dwh_user:dwh_password@localhost:5434/instacart_dwh \
+            -f .github/fixtures/seed_gold_tables.sql
+
+      - name: dbt deps
+        working-directory: dbt/instacart_dwh
+        run: dbt deps
+
+      - name: dbt build (compile + run + test)
+        working-directory: dbt/instacart_dwh
+        run: dbt build --target ci
+
+  # Job 3: Docker build check (verify images build without errors)
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Spark image
+        run: docker build -t instacart-lakehouse-pipeline/spark:ci ./spark

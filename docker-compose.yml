@@ -1,15 +1,5 @@
 name: instacart-lakehouse
 
-# =============================================================================
-# PHASE 1 — MinIO + Spark only.
-# dlt ingestion runs locally (outside Docker) pointing at the MinIO container.
-#
-# Start:   docker compose up --build -d
-# Stop:    docker compose down
-#
-# Subsequent phases will uncomment the relevant service blocks below.
-# =============================================================================
-
 # # ---------------------------------------------------------------------------
 # # PHASE 2 — Airflow shared config (uncomment when adding Airflow)
 # # ---------------------------------------------------------------------------
@@ -73,6 +63,7 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin123}
+      MINIO_PROMETHEUS_AUTH_TYPE: public   # allows Prometheus to scrape without auth
     ports:
       - "${MINIO_API_PORT:-9000}:9000"       # S3-compatible API  → dlt / Spark
       - "${MINIO_CONSOLE_PORT:-9001}:9001"   # Browser console    → http://localhost:9001
@@ -270,30 +261,33 @@ services:
   #     start_period: 30s
   #   restart: unless-stopped
 
-  # # ---------------------------------------------------------------------------
-  # # PHASE 3 — PostgreSQL DWH + dbt + Metabase (uncomment when ready)
-  # # ---------------------------------------------------------------------------
-  # postgres-dwh:
-  #   image: postgres:16-alpine
-  #   container_name: lakehouse-postgres-dwh
-  #   environment:
-  #     POSTGRES_USER: ${POSTGRES_DWH_USER:-dwh_user}
-  #     POSTGRES_PASSWORD: ${POSTGRES_DWH_PASSWORD:-dwh_password}
-  #     POSTGRES_DB: ${POSTGRES_DWH_DB:-instacart_dwh}
-  #   volumes:
-  #     - postgres-dwh-data:/var/lib/postgresql/data
-  #     - ./infrastructure/postgres/init:/docker-entrypoint-initdb.d
-  #   ports:
-  #     - "${POSTGRES_DWH_PORT_HOST:-5434}:5432"
-  #   networks:
-  #     - lakehouse
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_DWH_USER:-dwh_user} -d ${POSTGRES_DWH_DB:-instacart_dwh}"]
-  #     interval: 5s
-  #     timeout: 5s
-  #     retries: 10
-  #   restart: unless-stopped
-  #
+  # ---------------------------------------------------------------------------
+  # PHASE 3 — PostgreSQL DWH + Streamlit (BI layer)
+  # dbt runs locally (CLI) against postgres-dwh — no container needed for dbt
+  # Metabase replaced by Streamlit dashboard (runs locally via: streamlit run dashboard/app.py)
+  # ---------------------------------------------------------------------------
+  postgres-dwh:
+    image: postgres:16-alpine
+    container_name: lakehouse-postgres-dwh
+    environment:
+      POSTGRES_USER: ${POSTGRES_DWH_USER:-dwh_user}
+      POSTGRES_PASSWORD: ${POSTGRES_DWH_PASSWORD:-dwh_password}
+      POSTGRES_DB: ${POSTGRES_DWH_DB:-instacart_dwh}
+    volumes:
+      - postgres-dwh-data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init:/docker-entrypoint-initdb.d
+    ports:
+      - "${POSTGRES_DWH_PORT_HOST:-5434}:5432"  # localhost:5434 → dbt / psql
+    networks:
+      - lakehouse
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_DWH_USER:-dwh_user} -d ${POSTGRES_DWH_DB:-instacart_dwh}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # metabase — replaced by Streamlit (see dashboard/app.py)
   # metabase:
   #   image: metabase/metabase:v0.50.17
   #   container_name: lakehouse-metabase
@@ -311,49 +305,58 @@ services:
   #       condition: service_healthy
   #   networks:
   #     - lakehouse
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
-  #     interval: 15s
-  #     timeout: 10s
-  #     retries: 5
-  #     start_period: 30s
   #   restart: unless-stopped
 
-  # # ---------------------------------------------------------------------------
-  # # PHASE 4 — Prometheus + Grafana (uncomment when ready)
-  # # ---------------------------------------------------------------------------
-  # prometheus:
-  #   image: prom/prometheus:v2.53.0
-  #   container_name: lakehouse-prometheus
-  #   volumes:
-  #     - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-  #     - prometheus-data:/prometheus
-  #   command:
-  #     - "--config.file=/etc/prometheus/prometheus.yml"
-  #     - "--storage.tsdb.path=/prometheus"
-  #   ports:
-  #     - "${PROMETHEUS_PORT:-9090}:9090"
-  #   networks:
-  #     - lakehouse
-  #   restart: unless-stopped
-  #
-  # grafana:
-  #   image: grafana/grafana:11.1.0
-  #   container_name: lakehouse-grafana
-  #   environment:
-  #     GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
-  #     GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
-  #     GF_USERS_ALLOW_SIGN_UP: "false"
-  #   volumes:
-  #     - grafana-data:/var/lib/grafana
-  #     - ./infrastructure/grafana/provisioning:/etc/grafana/provisioning:ro
-  #   ports:
-  #     - "${GRAFANA_PORT:-3001}:3000"
-  #   depends_on:
-  #     - prometheus
-  #   networks:
-  #     - lakehouse
-  #   restart: unless-stopped
+  # ---------------------------------------------------------------------------
+  # PHASE 4 — Prometheus + Grafana + postgres-exporter
+  # ---------------------------------------------------------------------------
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    container_name: lakehouse-postgres-exporter
+    environment:
+      DATA_SOURCE_NAME: "postgresql://dwh_user:dwh_password@postgres-dwh:5432/instacart_dwh?sslmode=disable"
+    ports:
+      - "9187:9187"
+    networks:
+      - lakehouse
+    depends_on:
+      postgres-dwh:
+        condition: service_healthy
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    container_name: lakehouse-prometheus
+    volumes:
+      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=15d"
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    networks:
+      - lakehouse
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: lakehouse-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./infrastructure/grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "${GRAFANA_PORT:-3001}:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - lakehouse
+    restart: unless-stopped
 
 networks:
   lakehouse:
@@ -363,6 +366,6 @@ networks:
 volumes:
   minio-data:
   # postgres-airflow-data:   # Phase 2
-  # postgres-dwh-data:       # Phase 3
-  # prometheus-data:         # Phase 4
-  # grafana-data:            # Phase 4
+  postgres-dwh-data:
+  prometheus-data:
+  grafana-data:

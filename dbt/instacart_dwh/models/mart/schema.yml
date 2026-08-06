@@ -1,0 +1,88 @@
+models:
+  - name: mart_product_popularity
+    description: "Top products ranked by reorder rate with department context"
+    columns:
+      - name: product_id
+        tests:
+          - not_null
+          - unique
+      - name: product_name
+        tests:
+          - not_null
+      - name: department
+        tests:
+          - not_null
+      - name: times_ordered
+        tests:
+          - not_null
+      - name: reorder_rate
+        tests:
+          - not_null
+      - name: rank_in_department
+        tests:
+          - not_null
+
+  - name: mart_department_summary
+    description: "Order totals and reorder performance label per department"
+    columns:
+      - name: department
+        tests:
+          - not_null
+          - unique
+      - name: total_orders
+        tests:
+          - not_null
+      - name: reorder_performance
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["High", "Medium", "Low"]
+
+  - name: mart_order_time_analysis
+    description: "Order volume by day of week and hour with traffic category"
+    columns:
+      - name: order_dow
+        tests:
+          - not_null
+      - name: hour_of_day
+        tests:
+          - not_null
+      - name: traffic_category
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Peak", "High", "Moderate", "Low"]
+      - name: day_of_week
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+
+  - name: mart_aisle_reorder_analysis
+    description: "Aisles ranked by reorder rate"
+    columns:
+      - name: aisle
+        tests:
+          - not_null
+      - name: reorder_rate
+        tests:
+          - not_null
+      - name: reorder_rank
+        tests:
+          - not_null
+
+  - name: mart_user_order_behaviour
+    description: "Per-user order stats with segment labels"
+    columns:
+      - name: user_id
+        tests:
+          - not_null
+          - unique
+      - name: user_segment
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["High Value", "Regular", "Occasional"]
+      - name: avg_basket_size
+        tests:
+          - not_null
