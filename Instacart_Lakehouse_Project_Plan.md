@@ -12,7 +12,6 @@ pipelines.
 -   Apache Spark
 -   Delta Lake
 -   dltHub
-    load into the raw bucket
 -   Apache Airflow
 -   MinIO (Data Lake)
 -   PostgreSQL (Serving/Data Mart)
