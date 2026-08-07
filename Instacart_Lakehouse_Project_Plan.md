@@ -1,4 +1,4 @@
-# Instacart Lakehouse Platform (Production-Ready)
+# Instacart Lakehouse Platform
 
 ## Objective
 
