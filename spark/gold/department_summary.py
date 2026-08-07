@@ -9,7 +9,8 @@ GOLD_BASE = "s3a://gold"
 product_popularity_df = spark.read.format("delta").load(f"{SILVER_BASE}/slv_order_products_full")
 product_popularity_df.createOrReplaceTempView("order_products_full")
 
-result_df = spark.sql("""
+result_df = spark.sql(
+    """
     SELECT
         department,
         department_id,
@@ -18,11 +19,9 @@ result_df = spark.sql("""
         ROUND(SUM(CAST(is_reordered AS INT)) / COUNT(*), 4) AS reorder_rate
     FROM order_products_full
     GROUP BY department_id, department
-""")
+"""
+)
 
-result_df.write \
-    .format("delta") \
-    .mode("overwrite") \
-    .option("overwriteSchema", "true") \
-    .partitionBy("department") \
-    .save(f"{GOLD_BASE}/gold_department_summary")
+result_df.write.format("delta").mode("overwrite").option("overwriteSchema", "true").partitionBy(
+    "department"
+).save(f"{GOLD_BASE}/gold_department_summary")

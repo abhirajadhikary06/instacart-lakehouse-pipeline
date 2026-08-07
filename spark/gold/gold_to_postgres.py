@@ -6,18 +6,14 @@ GOLD_BASE = "s3a://gold"
 
 # PostgreSQL connection
 JDBC_URL = "jdbc:postgresql://postgres-dwh:5432/instacart_dwh"
-JDBC_PROPS = {
-    "user": "dwh_user",
-    "password": "dwh_password",
-    "driver": "org.postgresql.Driver"
-}
+JDBC_PROPS = {"user": "dwh_user", "password": "dwh_password", "driver": "org.postgresql.Driver"}
 
 # Map Gold Delta table path to PostgreSQL table name
 GOLD_TABLES = {
     "gold_product_popularity": "gold_product_popularity",
     "gold_department_summary": "gold_department_summary",
     "gold_order_time_analysis": "gold_order_time_analysis",
-    "gold_aisle_reorder_analysis":"gold_aisle_reorder_analysis",
+    "gold_aisle_reorder_analysis": "gold_aisle_reorder_analysis",
     "gold_user_order_behaviour": "gold_user_order_behaviour",
 }
 

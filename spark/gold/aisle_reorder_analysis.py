@@ -9,7 +9,8 @@ GOLD_BASE = "s3a://gold"
 product_popularity_df = spark.read.format("delta").load(f"{SILVER_BASE}/slv_order_products_full")
 product_popularity_df.createOrReplaceTempView("order_products_full")
 
-result_df = spark.sql("""
+result_df = spark.sql(
+    """
     SELECT
         aisle_id,
         aisle,
@@ -20,11 +21,9 @@ result_df = spark.sql("""
     FROM order_products_full
     GROUP BY aisle_id, aisle, department
     ORDER BY reorder_rate DESC, total_reorders DESC
-""")
+"""
+)
 
-result_df.write \
-    .format("delta") \
-    .mode("overwrite") \
-    .option("overwriteSchema", "true") \
-    .partitionBy("department") \
-    .save(f"{GOLD_BASE}/gold_aisle_reorder_analysis")
+result_df.write.format("delta").mode("overwrite").option("overwriteSchema", "true").partitionBy(
+    "department"
+).save(f"{GOLD_BASE}/gold_aisle_reorder_analysis")

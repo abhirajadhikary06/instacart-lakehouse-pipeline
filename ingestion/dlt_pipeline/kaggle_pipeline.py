@@ -7,10 +7,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Dataset config 
+# Dataset config
 KAGGLE_DATASET = "yasserh/instacart-online-grocery-basket-analysis-dataset"
-DOWNLOAD_DIR   = Path(__file__).resolve().parents[2] / "data" / "downloads"
-STAGING_DIR    = Path(__file__).resolve().parents[2] / "data" / "staging"
+DOWNLOAD_DIR = Path(__file__).resolve().parents[2] / "data" / "downloads"
+STAGING_DIR = Path(__file__).resolve().parents[2] / "data" / "staging"
+
 
 # Downloading dataset to local directory
 def download_dataset() -> None:
@@ -42,6 +43,7 @@ def download_dataset() -> None:
     else:
         print("CSVs already extracted, skipping.")
 
+
 # Loading data from local to MinIO
 def run_pipeline() -> None:
     pipeline = dlt.pipeline(
@@ -53,10 +55,13 @@ def run_pipeline() -> None:
     resources = []
     for csv_file in sorted(STAGING_DIR.glob("*.csv")):
         table_name = csv_file.stem
-        resource = filesystem(
-            bucket_url=STAGING_DIR.as_uri(),
-            file_glob=csv_file.name,
-        ) | read_csv()
+        resource = (
+            filesystem(
+                bucket_url=STAGING_DIR.as_uri(),
+                file_glob=csv_file.name,
+            )
+            | read_csv()
+        )
         resource.apply_hints(table_name=table_name)
         resources.append(resource)
 
@@ -66,5 +71,5 @@ def run_pipeline() -> None:
 
 
 if __name__ == "__main__":
-    download_dataset()  
-    run_pipeline()      
+    download_dataset()
+    run_pipeline()
