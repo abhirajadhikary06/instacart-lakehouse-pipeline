@@ -29,7 +29,7 @@ jobs:
       - name: Check black formatting
         run: black --check ingestion/ spark/ dashboard/
 
-  # Job 2: dbt compile + test (runs against a temporary PostgreSQL service)
+  # Job 2: dbt compile and test (runs against a temporary PostgreSQL service)
   dbt-test:
     name: dbt build & test
     runs-on: ubuntu-latest

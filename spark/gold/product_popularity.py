@@ -1,6 +1,4 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import current_timestamp, lit, col, when, broadcast
-from pyspark.sql import functions as F
 
 spark = SparkSession.builder.appName("Gold -- Product Popularity").getOrCreate()
 

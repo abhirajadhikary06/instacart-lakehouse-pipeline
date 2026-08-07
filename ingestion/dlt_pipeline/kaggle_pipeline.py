@@ -1,9 +1,11 @@
 import zipfile
 from pathlib import Path
-from dotenv import load_dotenv
-load_dotenv()
+
 import dlt
 from dlt.sources.filesystem import filesystem, read_csv
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Dataset config 
 KAGGLE_DATASET = "yasserh/instacart-online-grocery-basket-analysis-dataset"

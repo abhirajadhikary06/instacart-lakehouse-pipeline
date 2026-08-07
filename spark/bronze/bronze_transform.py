@@ -1,6 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import current_timestamp, lit
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType, ArrayType, FloatType  
+from pyspark.sql.types import FloatType, IntegerType, StringType, StructField, StructType
+
 spark = SparkSession.builder.appName("Bronze Transformation").getOrCreate()
 
 RAW_BASE    = "s3a://raw/instacart"

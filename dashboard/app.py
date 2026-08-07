@@ -1,8 +1,9 @@
-import streamlit as st
+from pathlib import Path
+
 import pandas as pd
 import plotly.express as px
+import streamlit as st
 from sqlalchemy import create_engine
-from pathlib import Path
 
 # Instacart brand palette
 INSTACART_GREEN = "#0AAD05"

@@ -1,6 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import current_timestamp, lit, col, when
-from pyspark.sql import functions as F
+from pyspark.sql.functions import col, when
 
 spark = SparkSession.builder.appName("Silver Write").getOrCreate()
 

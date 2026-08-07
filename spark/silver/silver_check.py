@@ -1,6 +1,5 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
-from pyspark.sql import functions as F
 
 spark = SparkSession.builder.appName("Silver Checks -- before Transformation").getOrCreate()
 

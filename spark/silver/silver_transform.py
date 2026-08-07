@@ -1,7 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import current_timestamp, lit, col, when, broadcast
-from pyspark.sql import functions as F
-from delta.tables import DeltaTable
+from pyspark.sql.functions import broadcast
 
 spark = SparkSession.builder.appName("Silver Transformations -- Join").getOrCreate()
 
