@@ -5,7 +5,7 @@ spark = SparkSession.builder.appName("Gold -- Aisle Reorder Analysis").getOrCrea
 SILVER_BASE = "s3a://silver"
 GOLD_BASE = "s3a://gold"
 
-# Which aisles have the highest reorder rates — shows habitual purchase categories.
+# Which aisles have the highest reorder rates
 product_popularity_df = spark.read.format("delta").load(f"{SILVER_BASE}/slv_order_products_full")
 product_popularity_df.createOrReplaceTempView("order_products_full")
 
