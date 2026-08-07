@@ -11,7 +11,7 @@ pipelines.
 
 -   Apache Spark
 -   Delta Lake
--   **dlt (data load tool)** — ingestion: extract, schema inference, and
+-   dltHub
     load into the raw bucket
 -   Apache Airflow
 -   MinIO (Data Lake)
@@ -81,7 +81,7 @@ Metabase, Prometheus, Grafana.
 ## Phase 1 Dataset Acquisition
 
 Goal: Automatically download with Kaggle API, validate, and load into the
-MinIO raw bucket via a **dlt** pipeline (schema inference, audit columns,
+MinIO raw bucket via a dlt pipeline (schema inference, audit columns,
 idempotent load packages).
 
 ## Phase 2 Bronze
