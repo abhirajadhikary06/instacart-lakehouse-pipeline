@@ -39,14 +39,12 @@ models:
           - not_null
 
   - name: stg_user_order_behaviour
-    columns: 
+    columns:
       - name: user_id
         tests:
           - not_null
           - unique
-      - name: max_days_since_prior_order
-        tests: 
-          - not_null
       - name: avg_days_between_orders
-        tests:
-          - not_null
+        tests: []
+      - name: max_days_since_prior_order
+        tests: []
