@@ -9,8 +9,7 @@ GOLD_BASE = "s3a://gold"
 product_popularity_df = spark.read.format("delta").load(f"{SILVER_BASE}/slv_order_products_full")
 product_popularity_df.createOrReplaceTempView("order_products_full")
 
-result_df = spark.sql(
-    """
+result_df = spark.sql("""
     SELECT
         order_dow,
         order_hour_of_day,
@@ -19,8 +18,7 @@ result_df = spark.sql(
     FROM order_products_full
     GROUP BY order_dow, order_hour_of_day
     ORDER BY order_dow, order_hour_of_day
-"""
-)
+""")
 
 result_df.write.format("delta").mode("overwrite").option("overwriteSchema", "true").partitionBy(
     "order_dow"

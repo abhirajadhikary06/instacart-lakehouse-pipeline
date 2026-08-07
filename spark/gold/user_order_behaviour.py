@@ -9,8 +9,7 @@ GOLD_BASE = "s3a://gold"
 product_popularity_df = spark.read.format("delta").load(f"{SILVER_BASE}/slv_order_products_full")
 product_popularity_df.createOrReplaceTempView("order_products_full")
 
-result_df = spark.sql(
-    """
+result_df = spark.sql("""
     SELECT
         user_id,
         COUNT(DISTINCT order_id) AS total_orders,
@@ -22,8 +21,7 @@ result_df = spark.sql(
         ROUND(AVG(days_since_prior_order), 2) AS avg_days_between_orders
     FROM order_products_full
     GROUP BY user_id
-"""
-)
+""")
 
 result_df.write.format("delta").mode("overwrite").option("overwriteSchema", "true").save(
     f"{GOLD_BASE}/gold_user_order_behaviour"
