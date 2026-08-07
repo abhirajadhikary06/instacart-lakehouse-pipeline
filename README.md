@@ -1,3 +1,8 @@
+<div align="center">
+  <img width="4692" height="1373" alt="image" src="https://github.com/user-attachments/assets/62a4cd44-f56e-4470-b438-c2dc53003ae3" />
+</div>
+
+
 # Instacart Lakehouse Pipeline
 
 A production-grade lakehouse pipeline built on the Instacart Market Basket dataset. Though it's an old dataset, it was super useful for engineering a real lakehouse at scale — **3.4M orders, 32M order-product rows, 50K products** across 134 aisles and 21 departments.
